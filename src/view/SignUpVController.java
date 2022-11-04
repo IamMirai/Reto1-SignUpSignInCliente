@@ -5,7 +5,6 @@
  */
 package view;
 
-
 import datatransferobject.Model;
 import datatransferobject.User;
 import datatransferobject.UserPrivilege;
@@ -40,6 +39,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.beans.Observable;
 import javafx.fxml.FXMLLoader;
 import model.ModelFactory;
@@ -48,9 +49,12 @@ import model.ModelFactory;
  *
  * @author Mikel
  */
-public class SignUpVController{
+public class SignUpVController {
+
     private Stage stage;
-    
+
+    public static final String EMAIL_VERIFICATION = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+(?:\\.[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+)*@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";
+
     @FXML
     private TextField textFieldUsername;
     @FXML
@@ -107,7 +111,7 @@ public class SignUpVController{
     private ImageView IconEye;
     @FXML
     private ImageView IconEye2;
-    
+
     public Stage getStage() {
         return stage;
     }
@@ -143,7 +147,7 @@ public class SignUpVController{
         textFieldUsername.focusedProperty().addListener(this::focusedPropertyChanged);
         textFieldConfirmPassword.focusedProperty().addListener(this::focusedPropertyChangedPasswordConfirm);
         passwordFieldConfirm.focusedProperty().addListener(this::focusedPropertyChangedPasswordConfirm);
-        
+
         //
         //Button Actions
         buttonSignIn.setOnAction(this::signIn);
@@ -166,40 +170,41 @@ public class SignUpVController{
         //Show primary window
         stage.show();
     }
-    
-    // Comprueba que los campos están informados y que el usuario, el email, el nombre completo y la contraseña son válidos (cumplen los requisitos especificados en sus propios eventos).
-        // En caso de que un campo (o varios) esté vacío cambiar el color de su icono (imageUser, imageEmail, etc.) y la línea inferior (lineUser, lineEmail, etc.) a rojo. Cambiar los mensajes de campo invalido (labelInvalidUser, labelInvalidEmail, etc.) a “Enter [campo]”
-        // (Cambiar campo por el dato a introducir en cuestión. 
-        // Ej.: Enter an email)
-        // Si los datos se validan correctamente, se ejecuta el método doSignUp() enviándole un user con los datos introducidos, y devuelve una excepción en caso de error o una respuesta OK si todo va bien.
-        // Si no devuelve ninguna excepción abre la ventana SignIn y cierra la actual.
-        // Si devuelve una excepción se muestra una ventana emergente que muestra el error.
 
+    // Comprueba que los campos están informados y que el usuario, el email, el nombre completo y la contraseña son válidos (cumplen los requisitos especificados en sus propios eventos).
+    // En caso de que un campo (o varios) esté vacío cambiar el color de su icono (imageUser, imageEmail, etc.) y la línea inferior (lineUser, lineEmail, etc.) a rojo. Cambiar los mensajes de campo invalido (labelInvalidUser, labelInvalidEmail, etc.) a “Enter [campo]”
+    // (Cambiar campo por el dato a introducir en cuestión. 
+    // Ej.: Enter an email)
+    // Si los datos se validan correctamente, se ejecuta el método doSignUp() enviándole un user con los datos introducidos, y devuelve una excepción en caso de error o una respuesta OK si todo va bien.
+    // Si no devuelve ninguna excepción abre la ventana SignIn y cierra la actual.
+    // Si devuelve una excepción se muestra una ventana emergente que muestra el error.
     private void textChanged(KeyEvent event) {
         if (((TextField) event.getSource()).getText().length() >= 25) {
             event.consume();
             ((TextField) event.getSource()).setText(((TextField) event.getSource()).getText().substring(0, 25));
         }
     }
-    
+
     private void textChangedEmail(KeyEvent event) {
         if (((TextField) event.getSource()).getText().length() >= 35) {
             event.consume();
             ((TextField) event.getSource()).setText(((TextField) event.getSource()).getText().substring(0, 35));
         }
     }
-    
+
     private void textChangedName(KeyEvent event) {
         if (((TextField) event.getSource()).getText().length() >= 50) {
             event.consume();
             ((TextField) event.getSource()).setText(((TextField) event.getSource()).getText().substring(0, 50));
         }
     }
-    
+
     private void nameIsEmptyOrNo() {
-        if(!textFieldName.isFocused()){
-            try{
-                if(textFieldName.getText().isEmpty()) throw new InvalidUserValueException("Name is empty");
+        if (!textFieldName.isFocused()) {
+            try {
+                if (textFieldName.getText().isEmpty()) {
+                    throw new InvalidUserValueException("Name is empty");
+                }
                 imageViewName.setImage(new Image(getClass().getResourceAsStream("/resources/iconFullName.png")));
                 lineName.setStroke(Color.GREY);
                 labelInvalidName.setText("");
@@ -212,30 +217,37 @@ public class SignUpVController{
 
         }
     }
-    
-    
+
     private void focusedPropertyChangedEmail(Observable value, Boolean oldValue, Boolean newValue) {
-        if(oldValue){  
-            if(!textFieldEmail.isFocused()){   
-                try{
-                    if(!textFieldEmail.getText().matches("^[A-Za-z0-9+_.-]+@(.+)[A-Za-z0-9+_.-]")) throw new InvalidEmailValueException("Invalid format of email (*@*.*)"); 
+        if (!textFieldEmail.isFocused()) {
+            boolean matchOrNot = false;
+            Pattern pattern = Pattern.compile(EMAIL_VERIFICATION);
+            Matcher matcher = pattern.matcher(textFieldEmail.getText());
+            matchOrNot = matcher.matches();
+            try {
+                if (!matchOrNot) {
+                    throw new InvalidEmailValueException("Invalid format of email (*@*.*)");
+                } else {
                     imageViewEmail.setImage(new Image(getClass().getResourceAsStream("/resources/iconEmail.png")));
                     lineEmail.setStroke(Color.GREY);
                     labelInvalidEmail.setText("");
-                } catch (InvalidEmailValueException e) {
-                    imageViewEmail.setImage(new Image(getClass().getResourceAsStream("/resources/iconEmailIncorrect.png")));
-                    lineEmail.setStroke(Color.RED);
-                    labelInvalidEmail.setText(e.getMessage());
                 }
-                
+            } catch (InvalidEmailValueException e) {
+                imageViewEmail.setImage(new Image(getClass().getResourceAsStream("/resources/iconEmailIncorrect.png")));
+                lineEmail.setStroke(Color.RED);
+                labelInvalidEmail.setText(e.getMessage());
             }
+
         }
     }
+
     private void focusedPropertyChanged(Observable value, Boolean oldValue, Boolean newValue) {
-        if(oldValue){
-            if(!textFieldUsername.isFocused()){
-                try{
-                    if(textFieldUsername.getText().contains(" ") || textFieldUsername.getText().isEmpty()) throw new InvalidUserValueException("Username can't be empty nor contain an empty space.");
+        if (oldValue) {
+            if (!textFieldUsername.isFocused()) {
+                try {
+                    if (textFieldUsername.getText().contains(" ") || textFieldUsername.getText().isEmpty()) {
+                        throw new InvalidUserValueException("Username can't be empty nor contain an empty space.");
+                    }
                     imageViewUsername.setImage(new Image(getClass().getResourceAsStream("/resources/iconUser.png")));
                     lineUsername.setStroke(Color.GREY);
                     labelInvalidUser.setText("");
@@ -247,12 +259,14 @@ public class SignUpVController{
             }
         }
     }
-    
-     private void focusedPropertyChangedPasswordConfirm(Observable value, Boolean oldValue, Boolean newValue){
-        if(oldValue){
-            if(!passwordFieldConfirm.isFocused() && !textFieldConfirmPassword.isFocused()){
-                try{
-                    if(!passwordFieldConfirm.getText().toString().equalsIgnoreCase(passwordField.getText().toString())) throw new InvalidConfirmPasswordValueException("These passwords didn’t match");
+
+    private void focusedPropertyChangedPasswordConfirm(Observable value, Boolean oldValue, Boolean newValue) {
+        if (oldValue) {
+            if (!passwordFieldConfirm.isFocused() && !textFieldConfirmPassword.isFocused()) {
+                try {
+                    if (!passwordFieldConfirm.getText().toString().equalsIgnoreCase(passwordField.getText().toString())) {
+                        throw new InvalidConfirmPasswordValueException("These passwords didn’t match");
+                    }
                     imageViewConfirmPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
                     lineConfirmPassword.setStroke(Color.GREY);
                     labelInvalidConfirmPassword.setText("");
@@ -264,16 +278,18 @@ public class SignUpVController{
             }
         }
     }
-    
-    private void focusedPropertyChangedPassword(Observable value, Boolean oldValue, Boolean newValue){
-        if(oldValue){
-            if(!passwordField.isFocused() && !textFieldPassword.isFocused()){
-                try{
-                    if(passwordField.getText().contains(" ") || passwordField.getText().length()<8 || passwordField.getText().isEmpty()) throw new InvalidPasswordValueException("Password can't be empty nor contain an empty space or his lenght is less than 8.");
+
+    private void focusedPropertyChangedPassword(Observable value, Boolean oldValue, Boolean newValue) {
+        if (oldValue) {
+            if (!passwordField.isFocused() && !textFieldPassword.isFocused()) {
+                try {
+                    if (passwordField.getText().contains(" ") || passwordField.getText().length() < 8 || passwordField.getText().isEmpty()) {
+                        throw new InvalidPasswordValueException("Password can't be empty nor contain an empty space or his lenght is less than 8.");
+                    }
                     imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
                     linePassword.setStroke(Color.GREY);
                     labelInvalidUser.setText("");
-                } catch(InvalidPasswordValueException e) {
+                } catch (InvalidPasswordValueException e) {
                     imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPasswordRedIncorrect.png")));
                     linePassword.setStroke(Color.RED);
                     labelInvalidPassword.setText(e.getMessage());
@@ -286,11 +302,11 @@ public class SignUpVController{
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/SignInView.fxml"));
             Parent root = (Parent) loader.load();
-            
+
             SignInVController controller = ((SignInVController) loader.getController());
-            
+
             controller.setStage(stage);
-            
+
             controller.initStage(root);
         } catch (IOException ex) {
             Logger.getLogger(SignInVController.class.getName()).log(Level.SEVERE, null, ex);
@@ -304,7 +320,7 @@ public class SignUpVController{
         focusedPropertyChangedEmail(null, true, false);
         nameIsEmptyOrNo();
         Model model = ModelFactory.getModel();
-        User user = new User(textFieldUsername.getText().toString(),textFieldEmail.getText().toString(),textFieldName.getText().toString(),UserStatus.ENABLED,UserPrivilege.USER,textFieldPassword.getText().toString(),new Timestamp(System.currentTimeMillis()));
+        User user = new User(textFieldUsername.getText().toString(), textFieldEmail.getText().toString(), textFieldName.getText().toString(), UserStatus.ENABLED, UserPrivilege.USER, textFieldPassword.getText().toString(), new Timestamp(System.currentTimeMillis()));
         model.doSignUp(user);
     }
 
@@ -319,9 +335,9 @@ public class SignUpVController{
             textFieldPassword.setVisible(false);
         }
     }
-    
+
     private void showHideConfirm(EventType<ActionEvent> ACTION) {
-      if (ButtonShowHideConfirm.isSelected()) {
+        if (ButtonShowHideConfirm.isSelected()) {
             IconEye2.setImage(new Image(getClass().getResourceAsStream("/resources/iconEye2.png")));
             passwordFieldConfirm.setVisible(false);
             textFieldConfirmPassword.setVisible(true);
@@ -333,17 +349,16 @@ public class SignUpVController{
     }
 
     private void textChangedPressed(KeyEvent KEY_RELEASED) {
-        if (passwordField.isVisible()){
+        if (passwordField.isVisible()) {
             textFieldPassword.setText(passwordField.getText());
-        } else if (textFieldPassword.isVisible()){
+        } else if (textFieldPassword.isVisible()) {
             passwordField.setText(textFieldPassword.getText());
         }
-        if (passwordFieldConfirm.isVisible()){
+        if (passwordFieldConfirm.isVisible()) {
             textFieldConfirmPassword.setText(passwordFieldConfirm.getText());
-        } else if(textFieldConfirmPassword.isVisible()){
+        } else if (textFieldConfirmPassword.isVisible()) {
             passwordFieldConfirm.setText(textFieldConfirmPassword.getText());
         }
-    } 
+    }
 
-    
 }
