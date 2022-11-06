@@ -53,7 +53,7 @@ public class SignUpVController {
 
     private Stage stage;
 
-    public static final String EMAIL_VERIFICATION = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+(?:\\.[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+)*@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$";
+    String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
 
     @FXML
     private TextField textFieldUsername;
@@ -221,9 +221,11 @@ public class SignUpVController {
     private void focusedPropertyChangedEmail(Observable value, Boolean oldValue, Boolean newValue) {
         if (!textFieldEmail.isFocused()) {
             boolean matchOrNot = false;
-            Pattern pattern = Pattern.compile(EMAIL_VERIFICATION);
+            Pattern pattern = Pattern.compile(emailPattern);
             Matcher matcher = pattern.matcher(textFieldEmail.getText());
-            matchOrNot = matcher.matches();
+            if(matcher.find()){
+                matchOrNot = true;
+            }
             try {
                 if (!matchOrNot) {
                     throw new InvalidEmailValueException("Invalid format of email (*@*.*)");

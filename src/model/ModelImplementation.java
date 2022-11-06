@@ -38,12 +38,10 @@ public class ModelImplementation implements Model {
      */
 
     @Override
-    public User doSignUp(User user) {
+    public void doSignUp(User user) {
         Package p = new Package(user, MessageEnum.RE_SIGNUP);
         ClientSocket cs = new ClientSocket();
         p = cs.conexionConServidor(p);
-        return user;
-
     }
 
 }
