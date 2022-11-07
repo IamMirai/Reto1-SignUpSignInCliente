@@ -31,7 +31,7 @@
             <Image url="@../resources/iconPassword.png" />
          </image>
       </ImageView>
-      <Button fx:id="buttonSignIn" onAction="#handleSignIn" defaultButton="true" layoutX="702.0" layoutY="485.0" mnemonicParsing="false" text="Sign In" stylesheets="@../resources/buttonCss.css">
+      <Button fx:id="buttonSignIn" defaultButton="true" layoutX="702.0" layoutY="485.0" mnemonicParsing="false" onAction="#handleSignIn" stylesheets="@../resources/buttonCss.css" text="Sign In">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
@@ -61,16 +61,6 @@
          <font>
             <Font name="Rockwell" size="14.0" />
          </font></Label>
-      <Label layoutX="125.0" layoutY="100.0" text="Sign In" textFill="WHITE">
-         <font>
-            <Font name="Rockwell" size="70.0" />
-         </font>
-      </Label>
-      <ImageView fitHeight="170.0" fitWidth="170.0" layoutX="165.0" layoutY="215.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../resources/logoCauliflower.png" />
-         </image>
-      </ImageView>
       <Label layoutX="640.0" layoutY="45.0" text="Welcome!" textFill="#64ff1a">
          <font>
             <Font name="Rockwell" size="70.0" />
@@ -100,5 +90,19 @@
             </ImageView>
          </graphic>
       </ToggleButton>
+      <Pane prefHeight="600.0" prefWidth="505.0">
+         <children>
+            <Label layoutX="125.0" layoutY="100.0" text="Sign In" textFill="WHITE">
+               <font>
+                  <Font name="Rockwell" size="70.0" />
+               </font>
+            </Label>
+            <ImageView fitHeight="170.0" fitWidth="170.0" layoutX="168.0" layoutY="215.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../resources/logoCauliflower.png" />
+               </image>
+            </ImageView>
+         </children>
+      </Pane>
    </children>
 </Pane>

@@ -12,6 +12,7 @@ import datatransferobject.User;
 import exceptions.ConnectionErrorException;
 import exceptions.InvalidUserException;
 import exceptions.MaxConnectionExceededException;
+import exceptions.TimeOutException;
 import exceptions.UserExistException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
 public class ModelImplementation implements Model {
     private static final int PORT = 5000;
     private static final String HOST = "localhost";
-    private Socket sckt;
+    private Socket sckt = null;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private static final Logger LOGGER = Logger.getLogger("ModelImplementation");
@@ -38,7 +39,7 @@ public class ModelImplementation implements Model {
      */
 
     @Override
-    public User doSignIn(User user) throws InvalidUserException, MaxConnectionExceededException, ConnectionErrorException {
+    public User doSignIn(User user) throws InvalidUserException, MaxConnectionExceededException, ConnectionErrorException, TimeOutException {
         try {
             sckt = new Socket(HOST,PORT);
             oos = new ObjectOutputStream(sckt.getOutputStream());
@@ -58,12 +59,16 @@ public class ModelImplementation implements Model {
                     throw new ConnectionErrorException("Connection error with the database. Try again later.");
             }
         } catch (IOException | ClassNotFoundException ex) {
-            Logger.getLogger(ModelImplementation.class.getName()).log(Level.SEVERE, null, ex);
+            throw new TimeOutException("Connection error with the database. Try again later...");
         } finally {
             try {
-                oos.close();
-                ois.close();
-                sckt.close();
+                if(oos != null){
+                    oos.close();
+                }if(ois != null){
+                   ois.close(); 
+                }if(sckt != null){
+                    sckt.close();
+                }
             } catch (IOException ex) {
                 Logger.getLogger(ModelImplementation.class.getName()).log(Level.SEVERE, null, ex);
             }
