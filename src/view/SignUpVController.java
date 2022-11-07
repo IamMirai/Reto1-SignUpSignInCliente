@@ -9,7 +9,6 @@ import datatransferobject.Model;
 import datatransferobject.User;
 import datatransferobject.UserPrivilege;
 import datatransferobject.UserStatus;
-import java.util.function.UnaryOperator;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.scene.input.KeyEvent;
@@ -27,7 +26,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import exceptions.InvalidUserValueException;
-import exceptions.InvalidUserException;
 import exceptions.InvalidPasswordValueException;
 import exceptions.InvalidConfirmPasswordValueException;
 import exceptions.InvalidEmailValueException;
@@ -223,7 +221,7 @@ public class SignUpVController {
             boolean matchOrNot = false;
             Pattern pattern = Pattern.compile(emailPattern);
             Matcher matcher = pattern.matcher(textFieldEmail.getText());
-            if(matcher.find()){
+            if (matcher.find()) {
                 matchOrNot = true;
             }
             try {
@@ -287,10 +285,11 @@ public class SignUpVController {
                 try {
                     if (passwordField.getText().contains(" ") || passwordField.getText().length() < 8 || passwordField.getText().isEmpty()) {
                         throw new InvalidPasswordValueException("Password can't be empty nor contain an empty space or his lenght is less than 8.");
+                    } else {
+                        imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
+                        linePassword.setStroke(Color.GREY);
+                        labelInvalidPassword.setText("");
                     }
-                    imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
-                    linePassword.setStroke(Color.GREY);
-                    labelInvalidUser.setText("");
                 } catch (InvalidPasswordValueException e) {
                     imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPasswordRedIncorrect.png")));
                     linePassword.setStroke(Color.RED);
