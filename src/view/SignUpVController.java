@@ -39,8 +39,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.WindowEvent;
 import model.ModelFactory;
 
 /**
@@ -52,6 +56,8 @@ public class SignUpVController {
     private Stage stage;
 
     String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+    
+    private static final Logger LOGGER = Logger.getLogger("SignUpVController");
 
     @FXML
     private TextField textFieldUsername;
@@ -126,6 +132,8 @@ public class SignUpVController {
         //Set window properties
         stage.setTitle("SignUp");
         stage.setResizable(false);
+        // Confirmar el cierre de la aplicación
+        stage.setOnCloseRequest(this::handleExitAction);
         //Add Listeners
         //Writing, key typed
         textFieldUsername.setOnKeyTyped(this::textChanged);
@@ -359,6 +367,23 @@ public class SignUpVController {
             textFieldConfirmPassword.setText(passwordFieldConfirm.getText());
         } else if (textFieldConfirmPassword.isVisible()) {
             passwordFieldConfirm.setText(textFieldConfirmPassword.getText());
+        }
+    }
+    
+    private void handleExitAction(WindowEvent event) {
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit? This will close the app.");
+        a.showAndWait();
+        try {
+            if (a.getResult().equals(ButtonType.CANCEL)) {
+                event.consume();
+            } else {
+                Platform.exit();
+            }
+        } catch (Exception e) {
+            String msg = "Error closing the app: " + e.getMessage();
+            Alert alert = new Alert(Alert.AlertType.ERROR, msg);
+            alert.show();
+            LOGGER.log(Level.SEVERE, msg);
         }
     }
 
