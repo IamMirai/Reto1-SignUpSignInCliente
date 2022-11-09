@@ -10,9 +10,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import main.ApplicationFXSignUpTest;
-import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,8 +22,8 @@ import static org.testfx.api.FxAssert.verifyThat;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.matcher.base.NodeMatchers.isEnabled;
+import static org.testfx.matcher.base.NodeMatchers.isInvisible;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
-import org.testfx.matcher.base.WindowMatchers;
 import static org.testfx.matcher.control.TextInputControlMatchers.hasText;
 
 /**
@@ -46,6 +46,9 @@ public class SignUpVControllerTest extends ApplicationTest {
     private TextField textFieldPassword;
     private TextField textFieldConfirmPassword;
     private Button buttonSignIn;
+    private Pane paneMessage;
+    private Pane paneSignIn;
+    private Pane paneSignUp;
 
     @BeforeClass
     public static void setUpClass() throws TimeoutException {
@@ -103,7 +106,7 @@ public class SignUpVControllerTest extends ApplicationTest {
 
         clickOn("#textFieldUsername");
         eraseText(9);
-        write("01234567890123456789012345");
+        write("0123456789012345678901234");
         clickOn("#textFieldEmail");
         assertTrue(textFieldUsername.getText().length() <= 25);
 
@@ -119,7 +122,13 @@ public class SignUpVControllerTest extends ApplicationTest {
     public void testD_EmailIsInvalid() {
         labelInvalidEmail = lookup("#labelInvalidEmail").query();
         textFieldEmail = lookup("#textFieldEmail").query();
+        
         clickOn("#textFieldEmail");
+        write("01234567890123456789012345678901234");
+        clickOn("#textFieldName");
+        assertTrue(textFieldEmail.getText().length() <= 35);
+        doubleClickOn("#textFieldEmail");
+        push(KeyCode.DELETE);
         write("test");
         clickOn("#textFieldName");
         assertEquals("Invalid format of email (*@*.*)", labelInvalidEmail.getText());
@@ -149,9 +158,17 @@ public class SignUpVControllerTest extends ApplicationTest {
      */
     @Test
     public void testE_NameisValid() {
+        labelInvalidName = lookup("#labelInvalidName").query();
+        textFieldName = lookup("#textFieldName").query();
+        
         clickOn("#textFieldName");
+        write("012345678901234567890123456789012345678901234");
+        clickOn("#passwordField");
+        assertTrue(textFieldName.getText().length() <= 50);
+        doubleClickOn("#textFieldName");
+        push(KeyCode.DELETE);
         write("test");
-        clickOn("#textFieldEmail");
+        clickOn("#passwordField");
         assertEquals("", labelInvalidName.getText());
     }
 
@@ -162,7 +179,14 @@ public class SignUpVControllerTest extends ApplicationTest {
     public void testF_PasswordIsInvalid() {
         labelInvalidPassword = lookup("#labelInvalidPassword").query();
         passwordField = lookup("#passwordField").query();
+        
         clickOn("#passwordField");
+        write("0123456789012345678901234");
+        clickOn("#passwordFieldConfirm");
+        assertTrue(passwordField.getText().length() <= 25);
+        
+        doubleClickOn("#passwordField");
+        push(KeyCode.DELETE);
         write("test");
         clickOn("#passwordFieldConfirm");
         assertEquals("Password can't be empty nor contain an empty space or his lenght is less than 8.", labelInvalidPassword.getText());
@@ -188,7 +212,13 @@ public class SignUpVControllerTest extends ApplicationTest {
         labelInvalidConfirmPassword = lookup("#labelInvalidConfirmPassword").query();
         passwordField = lookup("#passwordField").query();
         passwordFieldConfirm = lookup("#passwordFieldConfirm").query();
-        clickOn("#passwordFieldConfirm");
+        
+        write("0123456789012345678901234");
+        clickOn("#passwordField");
+        assertTrue(passwordFieldConfirm.getText().length() <= 25);
+        
+        doubleClickOn("#passwordFieldConfirm");
+        push(KeyCode.DELETE);
         write("test");
         clickOn("#passwordField");
         assertEquals("These passwords didn’t match", labelInvalidConfirmPassword.getText());
@@ -207,7 +237,7 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Test if ButtonShowHide makes visible textFieldPassword
      */
     @Test
-    public void testH_showHide() {
+    public void testh_showHide() {
         doubleClickOn("#ButtonShowHide");
         verifyThat("#textFieldPassword", isVisible());
     }
@@ -216,10 +246,16 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Tests for the textFieldPassword
      */
     @Test
-    public void testI_textFieldPassword() {
+    public void testi_textFieldPassword() {
         labelInvalidPassword = lookup("#labelInvalidPassword").query();
         textFieldPassword = lookup("#textFieldPassword").query();
+        
         clickOn("#textFieldPassword");
+        write("0123456789012345678901234");
+        clickOn("#passwordFieldConfirm");
+        assertTrue(textFieldPassword.getText().length() <= 25);
+        doubleClickOn("#textFieldPassword");
+        push(KeyCode.DELETE);
         write("test");
         clickOn("#passwordFieldConfirm");
         assertEquals("Password can't be empty nor contain an empty space or his lenght is less than 8.", labelInvalidPassword.getText());
@@ -241,7 +277,7 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Test if ButtonShowHideConfirm makes visible textFieldConfirmPassword
      */
     @Test
-    public void testJ_showHideConfirm() {
+    public void testj_showHideConfirm() {
         doubleClickOn("#ButtonShowHideConfirm");
         verifyThat("#textFieldConfirmPassword", isVisible());
     }
@@ -250,11 +286,17 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Tests for the textFieldConfirmPassword
      */
     @Test
-    public void testK_textFieldConfirmPassword() {
+    public void testk_textFieldConfirmPassword() {
         labelInvalidConfirmPassword = lookup("#labelInvalidConfirmPassword").query();
         textFieldPassword = lookup("#textFieldPassword").query();
         textFieldConfirmPassword = lookup("#textFieldConfirmPassword").query();
+        
         clickOn("#textFieldConfirmPassword");
+        write("0123456789012345678901234");
+        clickOn("#textFieldPassword");
+        assertTrue(textFieldConfirmPassword.getText().length() <= 25);
+        doubleClickOn("#textFieldConfirmPassword");
+        push(KeyCode.DELETE);
         write("test");
         clickOn("#textFieldPassword");
         assertEquals("These passwords didn’t match", labelInvalidConfirmPassword.getText());
@@ -270,25 +312,45 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Test to see if a user can go to the sign in view
      */
     @Test
-    public void testL_goSignIn() {
+    public void testl_goSignIn() {
         clickOn("#buttonSignIn");
-        verifyThat(window("My Window"), WindowMatchers.isShowing());
+        paneSignIn = lookup("#singInPane").query();
+        assertThat(paneSignIn, isVisible());
     }
 
     /**
-     * Go back to the SignUp view
+     * Test if it goes back to the SignUp view
      */
     @Test
-    public void testN_goBackToSignUp() {
+    public void testn_goBackToSignUp() {
         clickOn("#buttonSignUp");
+        paneSignUp = lookup("#singUpPane").query();
+        assertThat(paneSignUp, isVisible());
     }
 
     /**
-     * Test to see if a user can sign up
+     * Test to see if a user can register
      */
     @Test
-    public void testM_signUnTest() {
+    public void testm_signUpTest() {
         clickOn("#buttonSignUp");
-        verifyThat(window("My Window"), WindowMatchers.isShowing());
-    }
+        verifyThat("Username can't be empty nor contain an empty space.", isVisible());
+        verifyThat("Invalid format of email (*@*.*)", isVisible());
+        verifyThat("Name is empty", isVisible());
+        verifyThat("Password can't be empty nor contain an empty space or his lenght is less than 8.", isVisible());
+        clickOn("#textFieldUsername");
+        write("userTest4");
+        clickOn("#textFieldEmail");
+        write("userTest4@gmail.com");
+        clickOn("#textFieldName");
+        write("userTest4");
+        clickOn("#passwordField");
+        write("abcd*1234");
+        clickOn("#passwordFieldConfirm");
+        write("abcd*1234");
+        verifyThat("These passwords didn’t match", isInvisible());
+        clickOn("#buttonSignUp");
+        paneMessage = lookup("#applicationPane").query();
+        assertThat(paneMessage, isVisible());
+    }   
 }

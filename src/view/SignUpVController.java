@@ -56,7 +56,7 @@ public class SignUpVController {
     private Stage stage;
 
     String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
-    
+
     private static final Logger LOGGER = Logger.getLogger("SignUpVController");
 
     @FXML
@@ -153,6 +153,7 @@ public class SignUpVController {
         textFieldUsername.focusedProperty().addListener(this::focusedPropertyChanged);
         textFieldConfirmPassword.focusedProperty().addListener(this::focusedPropertyChangedPasswordConfirm);
         passwordFieldConfirm.focusedProperty().addListener(this::focusedPropertyChangedPasswordConfirm);
+        textFieldName.focusedProperty().addListener(this::focusedPropertyChangedNameIsEmptyOrNo);
 
         //
         //Button Actions
@@ -205,16 +206,17 @@ public class SignUpVController {
         }
     }
 
-    private void nameIsEmptyOrNo() {
+    private void focusedPropertyChangedNameIsEmptyOrNo(Observable value, Boolean oldValue, Boolean newValue) {
         if (!textFieldName.isFocused()) {
             try {
                 if (textFieldName.getText().isEmpty()) {
                     throw new InvalidUserValueException("Name is empty");
-                }
-                imageViewName.setImage(new Image(getClass().getResourceAsStream("/resources/iconFullName.png")));
-                lineName.setStroke(Color.GREY);
-                labelInvalidName.setText("");
+                } else {
+                    imageViewName.setImage(new Image(getClass().getResourceAsStream("/resources/iconFullName.png")));
+                    lineName.setStroke(Color.GREY);
+                    labelInvalidName.setText("");
 
+                }
             } catch (InvalidUserValueException e) {
                 imageViewName.setImage(new Image(getClass().getResourceAsStream("/resources/iconFullNameIncorrect.png")));
                 lineName.setStroke(Color.RED);
@@ -327,7 +329,7 @@ public class SignUpVController {
         focusedPropertyChangedPasswordConfirm(null, true, false);
         focusedPropertyChanged(null, true, false);
         focusedPropertyChangedEmail(null, true, false);
-        nameIsEmptyOrNo();
+        focusedPropertyChangedNameIsEmptyOrNo(null, true, false);
         Model model = ModelFactory.getModel();
         User user = new User(textFieldUsername.getText().toString(), textFieldEmail.getText().toString(), textFieldName.getText().toString(), UserStatus.ENABLED, UserPrivilege.USER, textFieldPassword.getText().toString(), new Timestamp(System.currentTimeMillis()));
         model.doSignUp(user);
@@ -369,7 +371,7 @@ public class SignUpVController {
             passwordFieldConfirm.setText(textFieldConfirmPassword.getText());
         }
     }
-    
+
     private void handleExitAction(WindowEvent event) {
         Alert a = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit? This will close the app.");
         a.showAndWait();
