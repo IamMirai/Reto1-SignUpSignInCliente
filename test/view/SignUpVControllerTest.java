@@ -40,6 +40,7 @@ public class SignUpVControllerTest extends ApplicationTest {
     private Text labelInvalidConfirmPassword;
     private TextField textFieldUsername;
     private TextField textFieldEmail;
+    private TextField textFieldName;
     private PasswordField passwordField;
     private PasswordField passwordFieldConfirm;
     private TextField textFieldPassword;
@@ -141,12 +142,24 @@ public class SignUpVControllerTest extends ApplicationTest {
         clickOn("#textFieldName");
         assertEquals("", labelInvalidEmail.getText());
     }
+    
+    
+    /**
+     * Tests for the textFieldName
+     */
+    @Test
+    public void testE_NameisValid() {
+        clickOn("#textFieldName");
+        write("test");
+        clickOn("#textFieldEmail");
+        assertEquals("", labelInvalidName.getText());
+    }
 
     /**
      * Tests for the passwordField
      */
     @Test
-    public void testE_PasswordIsInvalid() {
+    public void testF_PasswordIsInvalid() {
         labelInvalidPassword = lookup("#labelInvalidPassword").query();
         passwordField = lookup("#passwordField").query();
         clickOn("#passwordField");
@@ -171,7 +184,7 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Test if both of the password fields share the same text
      */
     @Test
-    public void testF_ConfirmPasswordIsInvalid() {
+    public void testG_ConfirmPasswordIsInvalid() {
         labelInvalidConfirmPassword = lookup("#labelInvalidConfirmPassword").query();
         passwordField = lookup("#passwordField").query();
         passwordFieldConfirm = lookup("#passwordFieldConfirm").query();
@@ -194,7 +207,7 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Test if ButtonShowHide makes visible textFieldPassword
      */
     @Test
-    public void testG_showHide() {
+    public void testH_showHide() {
         doubleClickOn("#ButtonShowHide");
         verifyThat("#textFieldPassword", isVisible());
     }
@@ -203,7 +216,7 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Tests for the textFieldPassword
      */
     @Test
-    public void testH_textFieldPassword() {
+    public void testI_textFieldPassword() {
         labelInvalidPassword = lookup("#labelInvalidPassword").query();
         textFieldPassword = lookup("#textFieldPassword").query();
         clickOn("#textFieldPassword");
@@ -228,7 +241,7 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Test if ButtonShowHideConfirm makes visible textFieldConfirmPassword
      */
     @Test
-    public void testI_showHideConfirm() {
+    public void testJ_showHideConfirm() {
         doubleClickOn("#ButtonShowHideConfirm");
         verifyThat("#textFieldConfirmPassword", isVisible());
     }
@@ -237,7 +250,7 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Tests for the textFieldConfirmPassword
      */
     @Test
-    public void testJ_textFieldConfirmPassword() {
+    public void testK_textFieldConfirmPassword() {
         labelInvalidConfirmPassword = lookup("#labelInvalidConfirmPassword").query();
         textFieldPassword = lookup("#textFieldPassword").query();
         textFieldConfirmPassword = lookup("#textFieldConfirmPassword").query();
@@ -257,22 +270,25 @@ public class SignUpVControllerTest extends ApplicationTest {
      * Test to see if a user can go to the sign in view
      */
     @Test
-    public void testk_goSignIn() {
+    public void testL_goSignIn() {
         clickOn("#buttonSignIn");
         verifyThat(window("My Window"), WindowMatchers.isShowing());
     }
 
-    
+    /**
+     * Go back to the SignUp view
+     */
+    @Test
+    public void testN_goBackToSignUp() {
+        clickOn("#buttonSignUp");
+    }
+
     /**
      * Test to see if a user can sign up
      */
-    /*
     @Test
-    public void testl_signUnTest() {
+    public void testM_signUnTest() {
         clickOn("#buttonSignUp");
         verifyThat(window("My Window"), WindowMatchers.isShowing());
     }
-*/
-    
-
 }
