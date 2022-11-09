@@ -12,6 +12,7 @@ import datatransferobject.UserPrivilege;
 import datatransferobject.UserStatus;
 import exceptions.ConnectionErrorException;
 import exceptions.InvalidUserException;
+import exceptions.InvalidUserValueException;
 import exceptions.MaxConnectionExceededException;
 import exceptions.TimeOutException;
 import exceptions.UserExistException;
@@ -69,19 +70,20 @@ public class ModelImplementationTest extends TestCase {
     @Test(expected=InvalidUserException.class)
     public void testDoSignInPasswordLessThan8() {
         System.out.println("doSignIn");
-        User user = new User("aaaaaa", "aaaa@aaaaa.aaa", "aaa aaaa", UserStatus.ENABLED, UserPrivilege.USER, "aaaaaa", new Timestamp(System.currentTimeMillis()));
+        User user = new User("zzzzzz", "zzzz@zzzz.zzz", "zzz zzzz", UserStatus.ENABLED, UserPrivilege.USER, "zzzzz", new Timestamp(System.currentTimeMillis()));
         ModelImplementation instance = new ModelImplementation();
         User result=null;
         try {
             result = instance.doSignIn(user);
-        } catch (InvalidUserException ex) {
-            Logger.getLogger(ModelImplementationTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MaxConnectionExceededException ex) {
             Logger.getLogger(ModelImplementationTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ConnectionErrorException ex) {
             Logger.getLogger(ModelImplementationTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (TimeOutException ex) {
             Logger.getLogger(ModelImplementationTest.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InvalidUserException ex) {
+            Logger.getLogger(ModelImplementationTest.class.getName()).log(Level.SEVERE, null, ex);
+            fail("Incorrect username or password.");
         }
         assertEquals(user, result);
     }
@@ -92,7 +94,7 @@ public class ModelImplementationTest extends TestCase {
     @Test
     public void testDoSignUp() {
         System.out.println("doSignUp");
-        User user =  new User("aaaaaa", "aaaa@aaaaa.aaa", "aaa aaaa", UserStatus.ENABLED, UserPrivilege.USER, "aaaaaa", new Timestamp(System.currentTimeMillis()));
+        User user =  new User("bbbbbb", "bbbbb@bbbbbb.bbb", "bbb bbbbb", UserStatus.ENABLED, UserPrivilege.USER, "bbbbbbb", new Timestamp(System.currentTimeMillis()));
         ModelImplementation instance = new ModelImplementation();
         try {
             instance.doSignUp(user);
