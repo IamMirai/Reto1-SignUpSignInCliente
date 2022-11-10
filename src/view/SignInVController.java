@@ -5,6 +5,8 @@
  */
 package view;
 
+import datatransferobject.Model;
+import datatransferobject.User;
 import java.util.logging.Level;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -29,8 +31,14 @@ import exceptions.InvalidUserException;
 import exceptions.InvalidUserValueException;
 import exceptions.TimeOutException;
 import exceptions.ConnectionErrorException;
+import exceptions.MaxConnectionExceededException;
 import java.io.IOException;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.stage.WindowEvent;
+import model.ModelFactory;
 
 /**
  *
@@ -39,6 +47,7 @@ import javafx.fxml.FXMLLoader;
 public class SignInVController {
 
     private Stage stage;
+    private static final Logger LOGGER = Logger.getLogger("SignInVController.class");
     @FXML
     private TextField textFieldUsername;
     @FXML
@@ -65,7 +74,6 @@ public class SignInVController {
     private ImageView userIcon;
     @FXML
     private ImageView passwordIcon;
-    private static final Logger LOGGER = Logger.getLogger("SignInVController.class");
 
     public Stage getStage() {
         return stage;
@@ -84,28 +92,53 @@ public class SignInVController {
         stage.setResizable(false);
 
         // USERNAME TEXT FIELD //
+        // Comprobar si el texto cambia
         textFieldUsername.setOnKeyTyped(this::textChanged);
+        // Comprobacion del cambio de foco en el campo de texto
         textFieldUsername.focusedProperty().addListener(this::focusedPropertyChanged);
 
         // PASSWORD FIELD //
+        // Comprobar si el texto cambia
         passwordField.setOnKeyReleased(this::handleKeyReleased);
         passwordField.setOnKeyTyped(this::textChanged);
+        // Comprobacion del cambio de foco en el campo de contraseña
         passwordField.focusedProperty().addListener(this::focusedPropertyChanged);
 
         // PASSWORD TEXT FIELD //
+        // Comprobacion del cambio de foco en el campo de texto
         textFieldPassword.focusedProperty().addListener(this::focusedPropertyChanged);
+        // Comprobar si el texto cambia
         textFieldPassword.setOnKeyTyped(this::textChanged);
         textFieldPassword.setOnKeyReleased(this::handleKeyReleased);
 
         // BUTTONS //
-        buttonSignIn.setOnAction(this::handleSignIn);
+        // Comprueba si los botones son pulsados
         buttonShowHide.setOnAction(this::handleShowHide);
         buttonSignUp.setOnAction(this::handleSignUp);
+        // Comprueba cuando el boton "x" para cerrar la ventana es pulsado
+        stage.setOnCloseRequest(this::handleExitAction);
 
         stage.show();
         LOGGER.info("SingIn window initialized");
     }
-
+    
+    private void handleExitAction(WindowEvent event) {
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit? This will close the app.");
+        a.showAndWait();
+        try {
+            if (a.getResult().equals(ButtonType.CANCEL)) {
+                event.consume();
+            } else {
+                Platform.exit();
+            }
+        } catch (Exception e) {
+            String msg = "Error closing the app: " + e.getMessage();
+            Alert alert = new Alert(Alert.AlertType.ERROR, msg);
+            alert.show();
+            LOGGER.log(Level.SEVERE, msg);
+        }
+    }
+    
     /**
      * Comprueba que el texto introducido sea inferior a 25 caracteres. Si llega
      * al máximo permitido no deja introducir más caracteres y sustrae y enseña
@@ -128,14 +161,17 @@ public class SignInVController {
      */
     private void handleSignUp(ActionEvent event) {
         try {
+            stage.close();
+            LOGGER.info("SignIn window closed");
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/SignUpView.fxml"));
             Parent root = (Parent) loader.load();
 
             SignUpVController controller = ((SignUpVController) loader.getController());
 
-            controller.setStage(stage);
+            controller.setStage(new Stage());
 
             controller.initStage(root);
+            LOGGER.info("SignUp window opened");
         } catch (IOException ex) {
             Logger.getLogger(SignInVController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -147,12 +183,39 @@ public class SignInVController {
      * @param event un evento tipo ActionEvent.ACTION para cuendo el boton es
      * pulsado
      */
+    @FXML
     private void handleSignIn(ActionEvent event) {
         buttonSignIn.requestFocus();
         // Comprueba que los campos están informados y que el usuario y la contraseña son válidos 
         // (cumplen los requisitos especificados en sus propios eventos)
         // Si los datos se validan correctamente, se ejecuta el método doSignIn().
         focusedPropertyChanged(null, true, false);
+        if (labelInvalidPassword.getText().equalsIgnoreCase("") && labelInvalidUser.getText().equalsIgnoreCase("")) {
+            Model model = ModelFactory.getModel();
+            User user = new User();
+            user.setLogin(textFieldUsername.getText());
+            user.setPassword(textFieldPassword.getText());
+            try {
+                user = model.doSignIn(user);
+                try {
+                    stage.close();
+                    LOGGER.info("SignIn window closed");
+                    FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/ApplicationView.fxml"));
+                    Parent root = (Parent) loader.load();
+                    ApplicationVController controller = ((ApplicationVController) loader.getController());
+                    controller.setStage(new Stage());
+                    controller.setUser(user);
+                    controller.initStage(root);
+                    LOGGER.info("Application window opened");
+                } catch (IOException ex) {
+                    Logger.getLogger(SignInVController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch (InvalidUserException | ConnectionErrorException | TimeOutException | MaxConnectionExceededException ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
+                alert.show();
+                LOGGER.info(ex.getMessage());
+            }
+        }
     }
 
     /**

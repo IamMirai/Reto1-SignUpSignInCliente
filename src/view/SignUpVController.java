@@ -5,10 +5,12 @@
  */
 package view;
 
+
 import datatransferobject.Model;
 import datatransferobject.User;
 import datatransferobject.UserPrivilege;
 import datatransferobject.UserStatus;
+import java.util.function.UnaryOperator;
 import javafx.event.ActionEvent;
 import javafx.event.EventType;
 import javafx.scene.input.KeyEvent;
@@ -26,6 +28,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import exceptions.InvalidUserValueException;
+import exceptions.InvalidUserException;
 import exceptions.InvalidPasswordValueException;
 import exceptions.InvalidConfirmPasswordValueException;
 import exceptions.InvalidEmailValueException;
@@ -134,6 +137,7 @@ public class SignUpVController {
         stage.setResizable(false);
         // Confirmar el cierre de la aplicación
         stage.setOnCloseRequest(this::handleExitAction);
+
         //Add Listeners
         //Writing, key typed
         textFieldUsername.setOnKeyTyped(this::textChanged);
@@ -153,8 +157,6 @@ public class SignUpVController {
         textFieldUsername.focusedProperty().addListener(this::focusedPropertyChanged);
         textFieldConfirmPassword.focusedProperty().addListener(this::focusedPropertyChangedPasswordConfirm);
         passwordFieldConfirm.focusedProperty().addListener(this::focusedPropertyChangedPasswordConfirm);
-        textFieldName.focusedProperty().addListener(this::focusedPropertyChangedNameIsEmptyOrNo);
-
         //
         //Button Actions
         buttonSignIn.setOnAction(this::signIn);
@@ -174,6 +176,9 @@ public class SignUpVController {
         ButtonShowHide.pressedProperty().addListener((event) -> this.showHide(ActionEvent.ACTION));
         ButtonShowHideConfirm.pressedProperty().addListener((event) -> this.showHideConfirm(ActionEvent.ACTION));
         //
+        // CLOSE //
+        stage.setOnCloseRequest(this::handleExitAction);
+        //
         //Show primary window
         stage.show();
     }
@@ -185,6 +190,7 @@ public class SignUpVController {
     // Si los datos se validan correctamente, se ejecuta el método doSignUp() enviándole un user con los datos introducidos, y devuelve una excepción en caso de error o una respuesta OK si todo va bien.
     // Si no devuelve ninguna excepción abre la ventana SignIn y cierra la actual.
     // Si devuelve una excepción se muestra una ventana emergente que muestra el error.
+
     private void textChanged(KeyEvent event) {
         if (((TextField) event.getSource()).getText().length() >= 25) {
             event.consume();
@@ -205,18 +211,15 @@ public class SignUpVController {
             ((TextField) event.getSource()).setText(((TextField) event.getSource()).getText().substring(0, 50));
         }
     }
+    
+    private void nameIsEmptyOrNo() {
+        if(!textFieldName.isFocused()){
+            try{
+                if(textFieldName.getText().isEmpty()) throw new InvalidUserValueException("Name is empty");
+                imageViewName.setImage(new Image(getClass().getResourceAsStream("/resources/iconFullName.png")));
+                lineName.setStroke(Color.GREY);
+                labelInvalidName.setText("");
 
-    private void focusedPropertyChangedNameIsEmptyOrNo(Observable value, Boolean oldValue, Boolean newValue) {
-        if (!textFieldName.isFocused()) {
-            try {
-                if (textFieldName.getText().isEmpty()) {
-                    throw new InvalidUserValueException("Name is empty");
-                } else {
-                    imageViewName.setImage(new Image(getClass().getResourceAsStream("/resources/iconFullName.png")));
-                    lineName.setStroke(Color.GREY);
-                    labelInvalidName.setText("");
-
-                }
             } catch (InvalidUserValueException e) {
                 imageViewName.setImage(new Image(getClass().getResourceAsStream("/resources/iconFullNameIncorrect.png")));
                 lineName.setStroke(Color.RED);
@@ -225,7 +228,6 @@ public class SignUpVController {
 
         }
     }
-
     private void focusedPropertyChangedEmail(Observable value, Boolean oldValue, Boolean newValue) {
         if (!textFieldEmail.isFocused()) {
             boolean matchOrNot = false;
@@ -270,13 +272,12 @@ public class SignUpVController {
         }
     }
 
-    private void focusedPropertyChangedPasswordConfirm(Observable value, Boolean oldValue, Boolean newValue) {
-        if (oldValue) {
-            if (!passwordFieldConfirm.isFocused() && !textFieldConfirmPassword.isFocused()) {
-                try {
-                    if (!passwordFieldConfirm.getText().toString().equalsIgnoreCase(passwordField.getText().toString())) {
-                        throw new InvalidConfirmPasswordValueException("These passwords didn’t match");
-                    }
+    
+     private void focusedPropertyChangedPasswordConfirm(Observable value, Boolean oldValue, Boolean newValue){
+        if(oldValue){
+            if(!passwordFieldConfirm.isFocused() && !textFieldConfirmPassword.isFocused()){
+                try{
+                    if(!passwordFieldConfirm.getText().toString().equalsIgnoreCase(passwordField.getText().toString())) throw new InvalidConfirmPasswordValueException("These passwords didn’t match");
                     imageViewConfirmPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
                     lineConfirmPassword.setStroke(Color.GREY);
                     labelInvalidConfirmPassword.setText("");
@@ -288,19 +289,16 @@ public class SignUpVController {
             }
         }
     }
-
-    private void focusedPropertyChangedPassword(Observable value, Boolean oldValue, Boolean newValue) {
-        if (oldValue) {
-            if (!passwordField.isFocused() && !textFieldPassword.isFocused()) {
-                try {
-                    if (passwordField.getText().contains(" ") || passwordField.getText().length() < 8 || passwordField.getText().isEmpty()) {
-                        throw new InvalidPasswordValueException("Password can't be empty nor contain an empty space or his lenght is less than 8.");
-                    } else {
-                        imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
-                        linePassword.setStroke(Color.GREY);
-                        labelInvalidPassword.setText("");
-                    }
-                } catch (InvalidPasswordValueException e) {
+    
+    private void focusedPropertyChangedPassword(Observable value, Boolean oldValue, Boolean newValue){
+        if(oldValue){
+            if(!passwordField.isFocused() && !textFieldPassword.isFocused()){
+                try{
+                    if(passwordField.getText().contains(" ") || passwordField.getText().length()<8 || passwordField.getText().isEmpty()) throw new InvalidPasswordValueException("Password can't be empty nor contain an empty space or his lenght is less than 8.");
+                    imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
+                    linePassword.setStroke(Color.GREY);
+                    labelInvalidUser.setText("");
+                } catch(InvalidPasswordValueException e) {
                     imageViewPassword.setImage(new Image(getClass().getResourceAsStream("/resources/iconPasswordRedIncorrect.png")));
                     linePassword.setStroke(Color.RED);
                     labelInvalidPassword.setText(e.getMessage());
@@ -311,31 +309,35 @@ public class SignUpVController {
 
     private void signIn(ActionEvent event) {
         try {
+            stage.close();
+            LOGGER.info("SignUp window closed");
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/SignInView.fxml"));
             Parent root = (Parent) loader.load();
-
             SignInVController controller = ((SignInVController) loader.getController());
-
-            controller.setStage(stage);
-
+            controller.setStage(new Stage());
             controller.initStage(root);
+            LOGGER.info("SignIn window opened");
         } catch (IOException ex) {
             Logger.getLogger(SignInVController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    private void signUp(EventType<ActionEvent> ACTION) throws UserExistException, ConnectionErrorException, TimeOutException, MaxConnectionExceededException {
-        focusedPropertyChangedPassword(null, true, false);
-        focusedPropertyChangedPasswordConfirm(null, true, false);
-        focusedPropertyChanged(null, true, false);
-        focusedPropertyChangedEmail(null, true, false);
-        focusedPropertyChangedNameIsEmptyOrNo(null, true, false);
+    
+    @FXML
+    private void signUp(ActionEvent event) {
+        nameIsEmptyOrNo();
         Model model = ModelFactory.getModel();
-        User user = new User(textFieldUsername.getText().toString(), textFieldEmail.getText().toString(), textFieldName.getText().toString(), UserStatus.ENABLED, UserPrivilege.USER, textFieldPassword.getText().toString(), new Timestamp(System.currentTimeMillis()));
-        model.doSignUp(user);
+        User user = new User(textFieldUsername.getText(), textFieldEmail.getText(),textFieldName.getText(),UserStatus.ENABLED,UserPrivilege.USER,textFieldPassword.getText(),new Timestamp(System.currentTimeMillis()));
+        try {
+            model.doSignUp(user);
+            signIn(event);
+        } catch (UserExistException | ConnectionErrorException | TimeOutException | MaxConnectionExceededException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
+            alert.show();
+            LOGGER.info(ex.getMessage());
+        }
     }
 
-    private void showHide(EventType<ActionEvent> ACTION) {
+    private void showHide(ActionEvent event) {
         if (ButtonShowHide.isSelected()) {
             IconEye.setImage(new Image(getClass().getResourceAsStream("/resources/iconEye2.png")));
             passwordField.setVisible(false);
@@ -346,9 +348,9 @@ public class SignUpVController {
             textFieldPassword.setVisible(false);
         }
     }
-
-    private void showHideConfirm(EventType<ActionEvent> ACTION) {
-        if (ButtonShowHideConfirm.isSelected()) {
+    
+    private void showHideConfirm(ActionEvent event) {
+      if (ButtonShowHideConfirm.isSelected()) {
             IconEye2.setImage(new Image(getClass().getResourceAsStream("/resources/iconEye2.png")));
             passwordFieldConfirm.setVisible(false);
             textFieldConfirmPassword.setVisible(true);
@@ -360,17 +362,17 @@ public class SignUpVController {
     }
 
     private void textChangedPressed(KeyEvent KEY_RELEASED) {
-        if (passwordField.isVisible()) {
+        if (passwordField.isVisible()){
             textFieldPassword.setText(passwordField.getText());
-        } else if (textFieldPassword.isVisible()) {
+        } else if (textFieldPassword.isVisible()){
             passwordField.setText(textFieldPassword.getText());
         }
-        if (passwordFieldConfirm.isVisible()) {
+        if (passwordFieldConfirm.isVisible()){
             textFieldConfirmPassword.setText(passwordFieldConfirm.getText());
-        } else if (textFieldConfirmPassword.isVisible()) {
+        } else if(textFieldConfirmPassword.isVisible()){
             passwordFieldConfirm.setText(textFieldConfirmPassword.getText());
         }
-    }
+    } 
 
     private void handleExitAction(WindowEvent event) {
         Alert a = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit? This will close the app.");
@@ -388,5 +390,4 @@ public class SignUpVController {
             LOGGER.log(Level.SEVERE, msg);
         }
     }
-
 }
