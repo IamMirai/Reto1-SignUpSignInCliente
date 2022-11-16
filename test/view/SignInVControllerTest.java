@@ -23,6 +23,7 @@ import static org.testfx.matcher.base.NodeMatchers.isEnabled;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 import static org.testfx.matcher.control.TextInputControlMatchers.hasText;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  * Test class for the sign in window
@@ -47,6 +48,7 @@ public class SignInVControllerTest extends ApplicationTest {
     /**
      * Test of the initial stage of the login view
      */
+    @Ignore
     @Test
     public void test1_InitialStage() {
         verifyThat("#textFieldUsername", hasText(""));
@@ -60,6 +62,7 @@ public class SignInVControllerTest extends ApplicationTest {
      * Test if the labels appear when both fields are empty and the SignIn
      * button is pressed
      */
+    @Ignore
     @Test
     public void test2_BothEmpty() {
         labelInvalidUser = lookup("#labelInvalidUser").query();
@@ -77,6 +80,7 @@ public class SignInVControllerTest extends ApplicationTest {
     /**
      * Tests for the username TextField
      */
+    @Ignore
     @Test
     public void test3_UsernameIsInvalid() {
         textFieldUsername = lookup("#textFieldUsername").query();
@@ -101,6 +105,7 @@ public class SignInVControllerTest extends ApplicationTest {
     /**
      * Tests for the passwordField
      */
+    @Ignore
     @Test
     public void test4_passwordFieldIsInvalid() {
         passwordField = lookup("#passwordField").query();
@@ -131,6 +136,7 @@ public class SignInVControllerTest extends ApplicationTest {
     /**
      * Test if both of the password fields share the same text
      */
+    @Ignore
     @Test
     public void test5_showHideSameText() {
         passwordField = lookup("#passwordField").query();
@@ -142,6 +148,7 @@ public class SignInVControllerTest extends ApplicationTest {
     /**
      * Test for the password textField
      */
+    @Ignore
     @Test
     public void test6_textFieldPasswordIsInvalid() {
         textFieldPassword = lookup("#textFieldPassword").query();
@@ -170,19 +177,50 @@ public class SignInVControllerTest extends ApplicationTest {
         assertEquals("", labelInvalidPassword.getText());
     }
     
-    /**
-     * Test to see if a user can log in
-     */
+    //@Ignore
     @Test
-    public void test7_signInTest() {
+    public void test7_badSignInUsernameTest(){
+        clickOn("#textFieldUsername");
+        write("userTest1");
+        clickOn("#passwordField");
+        write("abcd*1234");
         clickOn("#buttonSignIn");
         // Test if the alert appears 
         verifyThat("Incorrect username or password.", isVisible());
         push(KeyCode.ENTER);
         clickOn("#textFieldUsername");
-        eraseText(1);
-        clickOn("#textFieldPassword");
-        eraseText(1);
+        eraseText(9);
+        clickOn("#passwordField");
+        eraseText(9);
+    }
+    
+    //@Ignore
+    @Test
+    public void test8_badSignInPasswordTest(){
+        clickOn("#textFieldUsername");
+        write("userTest");
+        clickOn("#passwordField");
+        write("abcd*12345");
+        clickOn("#buttonSignIn");
+        // Test if the alert appears 
+        verifyThat("Incorrect username or password.", isVisible());
+        push(KeyCode.ENTER);
+        clickOn("#textFieldUsername");
+        eraseText(8);
+        clickOn("#passwordField");
+        eraseText(10);
+    }
+    
+    /**
+     * Test to see if a user can log in
+     */
+    //@Ignore
+    @Test
+    public void test9_signInCorrectTest() {
+        clickOn("#textFieldUsername");
+        write("userTest");
+        clickOn("#passwordField");
+        write("abcd*1234");
         clickOn("#buttonSignIn");
         // Thest if it can see the main windows pane 
         paneMessage = lookup("#applicationPane").query();
