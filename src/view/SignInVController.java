@@ -39,6 +39,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.WindowEvent;
 import model.ModelFactory;
+import model.DAOFactory;
 
 /**
  * Stage to logIn to the application.
@@ -97,22 +98,17 @@ public class SignInVController {
         // USERNAME TEXT FIELD //
         // Comprobar si el texto cambia
         textFieldUsername.setOnKeyTyped(this::textChanged);
-        // Comprobacion del cambio de foco en el campo de texto
-        textFieldUsername.focusedProperty().addListener(this::focusedPropertyChanged);
+        textFieldUsername.setOnKeyReleased(this::textErrorHandlerUsername);
 
         // PASSWORD FIELD //
         // Comprobar si el texto cambia
-        passwordField.setOnKeyReleased(this::handleKeyReleased);
+        passwordField.setOnKeyReleased(this::handleKeyReleasedPasswd);
         passwordField.setOnKeyTyped(this::textChanged);
-        // Comprobacion del cambio de foco en el campo de contraseña
-        passwordField.focusedProperty().addListener(this::focusedPropertyChanged);
 
         // PASSWORD TEXT FIELD //
-        // Comprobacion del cambio de foco en el campo de texto
-        textFieldPassword.focusedProperty().addListener(this::focusedPropertyChanged);
         // Comprobar si el texto cambia
         textFieldPassword.setOnKeyTyped(this::textChanged);
-        textFieldPassword.setOnKeyReleased(this::handleKeyReleased);
+        textFieldPassword.setOnKeyReleased(this::handleKeyReleasedPasswd);
 
         // BUTTONS //
         // Comprueba si los botones son pulsados
@@ -183,36 +179,32 @@ public class SignInVController {
      */
     @FXML
     private void handleSignIn(ActionEvent event) {
-        buttonSignIn.requestFocus();
-        // Comprueba que los campos están informados y que el usuario y la contraseña son válidos 
-        // (cumplen los requisitos especificados en sus propios eventos)
-        // Si los datos se validan correctamente, se ejecuta el método doSignIn().
-        focusedPropertyChanged(null, true, false);
-        if (labelInvalidPassword.getText().equalsIgnoreCase("") && labelInvalidUser.getText().equalsIgnoreCase("")) {
-            Model model = ModelFactory.getModel();
-            User user = new User();
-            user.setLogin(textFieldUsername.getText());
-            user.setPassword(textFieldPassword.getText());
-            try {
+        try {
+            LOGGER.info("Signin in user");
+            buttonSignIn.requestFocus();
+            // Comprueba que los campos están informados y que el usuario y la contraseña son válidos 
+            // (cumplen los requisitos especificados en sus propios eventos)
+            // Si los datos se validan correctame/ (cumplen los requisitos especificados en sus propios eventos)
+            // Si los datos se validan correctamente, se ejecuta el método doSignIn().
+            focusedPropertyChanged(null, true, false);
+            if (labelInvalidPassword.getText().equalsIgnoreCase("") && labelInvalidUser.getText().equalsIgnoreCase("")) {
+                Model model = DAOFactory.getModel();
+                User user = new User();
+                user.setLogin(textFieldUsername.getText());
+                user.setPassword(textFieldPassword.getText());
                 user = model.doSignIn(user);
-                try {
-                    stage.close();
-                    LOGGER.info("SignIn window closed");
-                    FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/ApplicationView.fxml"));
-                    Parent root = (Parent) loader.load();
-                    ApplicationVController controller = ((ApplicationVController) loader.getController());
-                    controller.setStage(new Stage());
-                    controller.setUser(user);
-                    controller.initStage(root);
-                    LOGGER.info("Application window opened");
-                } catch (IOException ex) {
-                    Logger.getLogger(SignInVController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } catch (InvalidUserException | ConnectionErrorException | TimeOutException | MaxConnectionExceededException ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
-                alert.show();
-                LOGGER.info(ex.getMessage());
+                stage.close();
+                FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/ApplicationView.fxml"));
+                Parent root = (Parent) loader.load();
+                ApplicationVController controller = ((ApplicationVController) loader.getController());
+                controller.setStage(new Stage());
+                controller.setUser(user);
+                controller.initStage(root);
             }
+        } catch (ConnectionErrorException | TimeOutException | MaxConnectionExceededException | InvalidUserException | IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
+            alert.show();
+            LOGGER.severe(e.getMessage());
         }
     }
 
@@ -239,7 +231,7 @@ public class SignInVController {
      * Copy text from one field to another
      * @param event an ActionEvent.ACTION event type for when the button is pressed
      */
-    private void handleKeyReleased(KeyEvent event) {
+    private void handleKeyReleasedPasswd(KeyEvent event) {
         if (passwordField.isVisible()) {
             // Cuando se escribe un carácter en el passwordField se copia en el textFieldPassword.
             textFieldPassword.setText(passwordField.getText());
@@ -247,8 +239,47 @@ public class SignInVController {
             // Cuando se escribe un carácter en el textFieldPassword se copia en el passwordField.
             passwordField.setText(textFieldPassword.getText());
         }
+        try {
+            if (passwordField.getText().isEmpty() || textFieldPassword.getText().isEmpty()) {
+                throw new InvalidPasswordValueException("Enter a password");
+            }
+            // Si el campo no está vacío comprobar que la contraseña tiene al menos 8 caracteres y que no hay espacios.
+            // En caso de que no tenga 8 caracteres o contenga espacios en blanco cambiar el color de imagePassword y linePassword a rojo.
+            if (passwordField.getText().contains(" ") || textFieldPassword.getText().contains(" ") || passwordField.getText().length() < 8 || textFieldPassword.getText().length() < 8) {
+                throw new InvalidPasswordValueException("Password must be at least 8 characters long and must not contain blank spaces");
+            }
+            passwordIcon.setImage(new Image(getClass().getResourceAsStream("/resources/iconPassword.png")));
+            passwordLine.setStroke(Color.GRAY);
+            labelInvalidPassword.setText("");
+        } catch (InvalidPasswordValueException ex) {
+            passwordIcon.setImage(new Image(getClass().getResourceAsStream("/resources/iconPasswordRedIncorrect.png")));
+            passwordLine.setStroke(Color.RED);
+            LOGGER.info(ex.getMessage());
+            labelInvalidPassword.setText(ex.getMessage());
+        }
     }
 
+    private void textErrorHandlerUsername(KeyEvent event){
+        try {
+            if (textFieldUsername.getText().isEmpty()) {
+                throw new InvalidUserValueException("Enter a username");
+            }
+            // Si el campo no está vacío comprobar que la contraseña tiene al menos 8 caracteres y que no hay espacios.
+            // En caso de que no tenga 8 caracteres o contenga espacios en blanco cambiar el color de imagePassword y linePassword a rojo.
+            if (textFieldUsername.getText().contains(" ")) {
+                throw new InvalidUserValueException("Username can't contain an empty space");
+            }
+            userIcon.setImage(new Image(getClass().getResourceAsStream("/resources/iconUser.png")));
+            usernameLine.setStroke(Color.GRAY);
+            labelInvalidUser.setText("");
+        } catch (InvalidUserValueException ex) {
+            userIcon.setImage(new Image(getClass().getResourceAsStream("/resources/iconUserIncorrect.png")));
+            usernameLine.setStroke(Color.RED);
+            LOGGER.info(ex.getMessage());
+            labelInvalidUser.setText(ex.getMessage());
+        }
+    }
+    
     /**
      * Check the change of focus
      * @param observable Actual value
