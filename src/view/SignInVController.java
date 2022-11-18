@@ -74,6 +74,21 @@ public class SignInVController {
     private ImageView userIcon;
     @FXML
     private ImageView passwordIcon;
+    private String usernameFromSignUp;
+    private String passwordFromSignUp;
+
+    public SignInVController() {
+        this.usernameFromSignUp="";
+        this.passwordFromSignUp="";
+    }
+
+    public void setUsernameFromSignUp(String usernameFromSignUp) {
+        this.usernameFromSignUp = usernameFromSignUp;
+    }
+
+    public void setPasswordFromSignUp(String passwordFromSignUp) {
+        this.passwordFromSignUp = passwordFromSignUp;
+    }
 
     public Stage getStage() {
         return stage;
@@ -99,7 +114,7 @@ public class SignInVController {
         textFieldUsername.setOnKeyTyped(this::textChanged);
         // Comprobacion del cambio de foco en el campo de texto
         textFieldUsername.focusedProperty().addListener(this::focusedPropertyChanged);
-
+        
         // PASSWORD FIELD //
         // Comprobar si el texto cambia
         passwordField.setOnKeyReleased(this::handleKeyReleased);
@@ -120,7 +135,14 @@ public class SignInVController {
         buttonSignUp.setOnAction(this::handleSignUp);
         // Comprueba cuando el boton "x" para cerrar la ventana es pulsado
         stage.setOnCloseRequest(this::handleExitAction);
-
+        
+        // PRUEBA EXAMEN insertar usuario despues del SignUp
+        textFieldUsername.setText(usernameFromSignUp);
+        
+        // PRUEBA EXAMEN insertar contraseña despues del SignUp
+        passwordField.setText(passwordFromSignUp);
+        textFieldPassword.setText(passwordFromSignUp);
+        
         stage.show();
         LOGGER.info("SingIn window initialized");
     }

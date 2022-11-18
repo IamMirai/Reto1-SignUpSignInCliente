@@ -16,7 +16,7 @@ public class ModelFactory {
     
     public static Model getModel() {
         if (model == null) {
-            model = new ModelImplementation();
+            model = new DAO();
         }
         return model;
     }

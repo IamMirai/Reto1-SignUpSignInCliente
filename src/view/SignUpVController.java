@@ -116,6 +116,11 @@ public class SignUpVController{
     private ImageView IconEye;
     @FXML
     private ImageView IconEye2;
+    private boolean signUpExitoso;
+
+    public SignUpVController() {
+        this.signUpExitoso=false;
+    }
     
     public Stage getStage() {
         return stage;
@@ -336,6 +341,10 @@ public class SignUpVController{
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/SignInView.fxml"));
             Parent root = (Parent) loader.load();
             SignInVController controller = ((SignInVController) loader.getController());
+            if(signUpExitoso){
+                controller.setUsernameFromSignUp(textFieldUsername.getText());
+                controller.setPasswordFromSignUp(textFieldPassword.getText());
+            }
             controller.setStage(new Stage());
             controller.initStage(root);
             LOGGER.info("SignIn window opened");
@@ -355,11 +364,13 @@ public class SignUpVController{
         User user = new User(textFieldUsername.getText(), textFieldEmail.getText(),textFieldName.getText(),UserStatus.ENABLED,UserPrivilege.USER,textFieldPassword.getText(),new Timestamp(System.currentTimeMillis()));
         try {
             model.doSignUp(user);
+            signUpExitoso=true;
             signIn(event);
         } catch (UserExistException | ConnectionErrorException | TimeOutException | MaxConnectionExceededException ex) {
             Alert alert = new Alert(Alert.AlertType.ERROR, ex.getMessage());
             alert.show();
             LOGGER.info(ex.getMessage());
+            signUpExitoso=false;
         }
     }
     /**
