@@ -186,7 +186,8 @@ public class SignInVController {
             // (cumplen los requisitos especificados en sus propios eventos)
             // Si los datos se validan correctame/ (cumplen los requisitos especificados en sus propios eventos)
             // Si los datos se validan correctamente, se ejecuta el método doSignIn().
-            focusedPropertyChanged(null, true, false);
+            textErrorHandlerUsername(null);
+            handleKeyReleasedPasswd(null);
             if (labelInvalidPassword.getText().equalsIgnoreCase("") && labelInvalidUser.getText().equalsIgnoreCase("")) {
                 Model model = DAOFactory.getModel();
                 User user = new User();
